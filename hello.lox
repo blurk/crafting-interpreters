@@ -1,0 +1,11 @@
+// this is a comment
+
+func say() {
+	print "Hello";
+}
+
+say();
+
+var a;
+var b = 10;
+var var;

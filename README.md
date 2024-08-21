@@ -11,3 +11,5 @@ When we say a language implementation “is a compiler”, we mean it translates
 Conversely, when we say an implementation “is an interpreter”, we mean it takes in source code and executes it immediately. It runs programs “from source”.
 
 ![alt text](image-1.png)
+
+**maximal munch**
