@@ -1,26 +1,31 @@
 class Expr {
-  constructor() {}
+accept(visitor){}
 }
 class Binary extends Expr {
-  constructor(left, operator, right) {
-    this.left = left;
-    this.operator = operator;
-    this.right = right;
-  }
+constructor(left, operator, right) {
+super();
+this.left = left;
+this.operator = operator;
+this.right = right;
+}accept(visitor){return  visitor.visitBinaryExpr(this);}
 }
 class Grouping extends Expr {
-  constructor(expression) {
-    this.expression = expression;
-  }
+constructor(expression) {
+super();
+this.expression = expression;
+}accept(visitor){return  visitor.visitGroupingExpr(this);}
 }
 class Literal extends Expr {
-  constructor(value) {
-    this.value = value;
-  }
+constructor(value) {
+super();
+this.value = value;
+}accept(visitor){return  visitor.visitLiteralExpr(this);}
 }
 class Unary extends Expr {
-  constructor(operator, right) {
-    this.operator = operator;
-    this.right = right;
-  }
+constructor(operator, right) {
+super();
+this.operator = operator;
+this.right = right;
+}accept(visitor){return  visitor.visitUnaryExpr(this);}
 }
+module.exports={Expr, Binary,Grouping,Literal,Unary}

@@ -1,5 +1,4 @@
 const fs = require("node:fs");
-const path = require("node:path");
 
 if (process.argv.length !== 2) {
   console.error("Usage: node generate_ast.js <output directory>");
@@ -16,10 +15,12 @@ defineAst(outputDir, "Expr", [
 ]);
 
 function defineType(path, baseName, className, fieldList) {
-  const stringToAppend = `class ${className} extends ${baseName} {\nconstructor(${fieldList}) {\n${fieldList
+  const stringToAppend = `class ${className} extends ${baseName} {\nconstructor(${fieldList}) {\nsuper();\n${fieldList
     .split(",")
     .map((item) => `this.${item.trim()} = ${item.trim()};`)
-    .join("\n")}\n}\n}\n`;
+    .join(
+      "\n"
+    )}\n}accept(visitor){return  visitor.visit${className}${baseName}(this);}\n}\n`;
 
   fs.appendFileSync(path, stringToAppend);
 }
@@ -27,7 +28,11 @@ function defineType(path, baseName, className, fieldList) {
 function defineAst(outputDir = "interpreter", baseName, types) {
   const path = outputDir + "/" + baseName + ".js";
 
-  let data = `class ${baseName} {\nconstructor() {}\n}\n`;
+  //   const visitorString = defineVisitor(baseName, types);
+  // \n${visitorString}
+  // \nconstructor() {}
+
+  let data = `class ${baseName} {\naccept(visitor){}\n}\n`;
 
   fs.writeFileSync(path, data);
 
@@ -37,4 +42,22 @@ function defineAst(outputDir = "interpreter", baseName, types) {
 
     defineType(path, baseName, className, fields);
   }
+
+  fs.appendFileSync(
+    path,
+    `module.exports={Expr, ${types
+      .map((type) => type.split(":")[0].trim())
+      .join(",")}}`
+  );
+}
+
+function defineVisitor(baseName, types) {
+  let result = "";
+  for (const type of types) {
+    const typeName = type.split(":")[0].trim();
+
+    result += `visit${typeName}${baseName}(${baseName.toLowerCase()}){};\n`;
+  }
+
+  return result;
 }

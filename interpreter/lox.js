@@ -3,6 +3,9 @@ const readline = require("node:readline");
 const process = require("node:process");
 
 const { Scanner } = require("./scanner");
+const AstPrinter = require("./AstPrinter");
+const Expr = require("./Expr");
+const { Token, TOKEN_TYPE } = require("./token");
 
 let hadError = false;
 
@@ -54,6 +57,19 @@ function runPrompt() {
 }
 
 function main() {
+  const astPrinter = new AstPrinter();
+  const expression = new Expr.Binary(
+    new Expr.Unary(
+      new Token(TOKEN_TYPE.MINUS, "-", null, 1),
+      new Expr.Literal(123)
+    ),
+    new Token(TOKEN_TYPE.STAR, "*", null, 1),
+    new Expr.Grouping(new Expr.Literal(45.67))
+  );
+
+  debugger;
+  console.log(astPrinter.print(expression));
+
   if (process.argv.length > 3) {
     console.error("Usage: jlox [script]");
     process.exit(1);
