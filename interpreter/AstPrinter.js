@@ -3,15 +3,13 @@
 class AstPrinter {
   parenthesize(name, ...exprs) {
     const builder = [];
-    builder.push("(");
-    builder.push(name);
 
     for (const expr of exprs) {
-      builder.push(" ");
       builder.push(expr.accept(this));
+      builder.push(" ");
     }
 
-    builder.push(")");
+    builder.push(name);
 
     return builder.join("");
   }
