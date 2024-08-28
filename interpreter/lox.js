@@ -22,6 +22,14 @@ function error(line = -1, message = "") {
   report(line, "", message);
 }
 
+function errorToken(token, message) {
+  if (token.type == TOKEN_TYPE.EOF) {
+    report(token.line, " at end", message);
+  } else {
+    report(token.line, " at '" + token.lexeme + "'", message);
+  }
+}
+
 function report(line = -1, where = "", message = "") {
   console.error("[line " + line + "] Error" + where + ": " + message);
 
@@ -67,7 +75,6 @@ function main() {
     new Expr.Grouping(new Expr.Literal(45.67))
   );
 
-  debugger;
   console.log(astPrinter.print(expression));
 
   if (process.argv.length > 3) {
