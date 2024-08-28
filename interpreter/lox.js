@@ -6,6 +6,7 @@ const { Scanner } = require("./scanner");
 const AstPrinter = require("./AstPrinter");
 const Expr = require("./Expr");
 const { Token, TOKEN_TYPE } = require("./token");
+const Parser = require("./Parser");
 
 let hadError = false;
 
@@ -13,9 +14,14 @@ function run(source = "") {
   const scanner = new Scanner(source, error);
   const tokens = scanner.scanTokens();
 
-  for (const token of tokens) {
-    console.log(token);
-  }
+  const parser = new Parser(tokens, errorToken);
+  const expression = parser.parse();
+
+  // Stop if there was a syntax error.
+  if (hadError) return;
+
+  const astPrinter = new AstPrinter();
+  console.log(astPrinter.print(expression));
 }
 
 function error(line = -1, message = "") {
@@ -65,17 +71,17 @@ function runPrompt() {
 }
 
 function main() {
-  const astPrinter = new AstPrinter();
-  const expression = new Expr.Binary(
-    new Expr.Unary(
-      new Token(TOKEN_TYPE.MINUS, "-", null, 1),
-      new Expr.Literal(123)
-    ),
-    new Token(TOKEN_TYPE.STAR, "*", null, 1),
-    new Expr.Grouping(new Expr.Literal(45.67))
-  );
+  // const astPrinter = new AstPrinter();
+  // const expression = new Expr.Binary(
+  //   new Expr.Unary(
+  //     new Token(TOKEN_TYPE.MINUS, "-", null, 1),
+  //     new Expr.Literal(123)
+  //   ),
+  //   new Token(TOKEN_TYPE.STAR, "*", null, 1),
+  //   new Expr.Grouping(new Expr.Literal(45.67))
+  // );
 
-  console.log(astPrinter.print(expression));
+  // console.log(astPrinter.print(expression));
 
   if (process.argv.length > 3) {
     console.error("Usage: jlox [script]");

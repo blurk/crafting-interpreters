@@ -17,6 +17,7 @@ class Parser {
   /** @type {Token[]} */
   #tokens = [];
   #current = 0;
+  #error;
 
   /**
    * @param {Token[]} tokens
@@ -24,8 +25,15 @@ class Parser {
    */
   constructor(tokens, error) {
     this.#tokens = tokens;
+    this.#error = error;
+  }
 
-    this.error = error;
+  parse() {
+    try {
+      return this.expression();
+    } catch (error) {
+      return null;
+    }
   }
 
   _previous() {
@@ -48,7 +56,7 @@ class Parser {
   }
 
   _advance() {
-    if (!this._isAtEnd()) current++;
+    if (!this._isAtEnd()) this.#current++;
     return this._previous();
   }
 
@@ -64,8 +72,30 @@ class Parser {
   }
 
   _error(token, message) {
-    Lox.error(token, message);
+    this.#error(token, message);
     return new ParseError();
+  }
+
+  _synchronize() {
+    this._advance();
+
+    while (!this._isAtEnd()) {
+      if (this._previous().type == TOKEN_TYPE.SEMICOLON) return;
+
+      switch (this._peek().type) {
+        case TOKEN_TYPE.CLASS:
+        case TOKEN_TYPE.FUN:
+        case TOKEN_TYPE.VAR:
+        case TOKEN_TYPE.FOR:
+        case TOKEN_TYPE.IF:
+        case TOKEN_TYPE.WHILE:
+        case TOKEN_TYPE.PRINT:
+        case TOKEN_TYPE.RETURN:
+          return;
+      }
+
+      this._advance();
+    }
   }
 
   _consume(type, message) {
@@ -114,9 +144,9 @@ class Parser {
   term() {
     let expr = this.factor();
 
-    while (match(TOKEN_TYPE.MINUS, TOKEN_TYPE.PLUS)) {
-      const operator = previous();
-      const right = factor();
+    while (this._match(TOKEN_TYPE.MINUS, TOKEN_TYPE.PLUS)) {
+      const operator = this._previous();
+      const right = this.factor();
       expr = new Expr.Binary(expr, operator, right);
     }
 
@@ -126,7 +156,7 @@ class Parser {
   factor() {
     let expr = this.unary();
 
-    while (match(TOKEN_TYPE.SLASH, TOKEN_TYPE.STAR)) {
+    while (this._match(TOKEN_TYPE.SLASH, TOKEN_TYPE.STAR)) {
       const operator = this._previous();
       const right = this.unary();
       expr = new Expr.Binary(expr, operator, right);
@@ -156,9 +186,11 @@ class Parser {
 
     if (this._match(TOKEN_TYPE.LEFT_PAREN)) {
       const expr = this.expression();
-      this.consume(TOKEN_TYPE.RIGHT_PAREN, "Expect ')' after expression.");
+      this._consume(TOKEN_TYPE.RIGHT_PAREN, "Expect ')' after expression.");
       return new Expr.Grouping(expr);
     }
+
+    throw this._error(this._peek(), "Expect expression.");
   }
 }
 
