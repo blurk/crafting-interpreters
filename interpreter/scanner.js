@@ -67,7 +67,7 @@ class Scanner {
     }
 
     if (this.isAtEnd()) {
-      this.error(line, "Unterminated string.");
+      this.error(this.#line, "Unterminated string.");
       return;
     }
 
@@ -84,7 +84,7 @@ class Scanner {
   }
 
   peekNext() {
-    if (this.#current + 1 >= this.#source.length()) return "\0";
+    if (this.#current + 1 >= this.#source.length) return "\0";
     return this.#source.charAt(this.#current + 1);
   }
 
@@ -187,6 +187,30 @@ class Scanner {
         if (this.match("/")) {
           // A comment goes until the end of the line.
           while (this.peek() != "\n" && !this.isAtEnd()) {
+            this.advance();
+          }
+        } else if (this.match("*")) {
+          let nesting = 1;
+
+          while (nesting > 0) {
+            if (this.peek() === "\0") {
+              this.error(this.#line, "Unterminated block comment.");
+              return;
+            }
+
+            if (this.peek() == "/" && this.peekNext() === "*") {
+              this.advance();
+              this.advance();
+              nesting++;
+            }
+
+            if (this.peek() === "*" && this.peekNext() === "/") {
+              this.advance();
+              this.advance();
+              nesting--;
+              continue;
+            }
+
             this.advance();
           }
         } else if (this.isAlpha(c)) {

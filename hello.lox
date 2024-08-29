@@ -1,11 +1,10 @@
 // this is a comment
 
-func say() {
-	print "Hello";
-}
+/* this is a comment
+	/* this is a comment */
+	/* this is a comment */
+	/* this is a comment */
+	/* this is a comment */
+*/
 
-say();
-
-var a;
-var b = 10;
-var var;
+1 + 2
