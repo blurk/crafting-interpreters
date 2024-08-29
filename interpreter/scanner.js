@@ -67,7 +67,7 @@ class Scanner {
     }
 
     if (this.isAtEnd()) {
-      this.error(line, "Unterminated string.");
+      this.error(this.#line, "Unterminated string.");
       return;
     }
 
