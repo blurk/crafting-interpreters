@@ -4,11 +4,14 @@ const process = require("node:process");
 
 const { Scanner } = require("./scanner");
 const AstPrinter = require("./AstPrinter");
-const Expr = require("./Expr");
-const { Token, TOKEN_TYPE } = require("./token");
+const { TOKEN_TYPE } = require("./token");
 const Parser = require("./Parser");
+const Interpreter = require("./Interpreter");
+const RuntimeError = require("./RuntimeError");
 
 let hadError = false;
+let hadRuntimeError = false;
+const interpreter = new Interpreter(runtimeError);
 
 function run(source = "") {
   const scanner = new Scanner(source, error);
@@ -20,12 +23,22 @@ function run(source = "") {
   // Stop if there was a syntax error.
   if (hadError) return;
 
-  const astPrinter = new AstPrinter();
-  console.log(astPrinter.print(expression));
+  interpreter.interpret(expression);
+
+  // const astPrinter = new AstPrinter();
+  // console.log(astPrinter.print(expression));
 }
 
 function error(line = -1, message = "") {
   report(line, "", message);
+}
+
+/**
+ * @param {RuntimeError} error
+ */
+function runtimeError(error) {
+  console.error(error.message + "\n[line " + error.token.line + "]");
+  hadRuntimeError = true;
 }
 
 function errorToken(token, message) {
@@ -44,7 +57,11 @@ function report(line = -1, where = "", message = "") {
 
 function runFile(path) {
   if (hadError) {
-    process.exit(1);
+    process.exit(65);
+  }
+
+  if (hadRuntimeError) {
+    process.exit(70);
   }
 
   try {
