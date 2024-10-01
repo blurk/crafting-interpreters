@@ -18,12 +18,12 @@ function run(source = "") {
   const tokens = scanner.scanTokens();
 
   const parser = new Parser(tokens, errorToken);
-  const expression = parser.parse();
+  const statements = parser.parse();
 
   // Stop if there was a syntax error.
   if (hadError) return;
 
-  interpreter.interpret(expression);
+  interpreter.interpret(statements);
 
   // const astPrinter = new AstPrinter();
   // console.log(astPrinter.print(expression));

@@ -1,4 +1,5 @@
 const { Literal, Grouping, Expr, Unary, Binary } = require("./Expr");
+const { Print, Expression, Stmt } = require("./Stmt");
 const RuntimeError = require("./RuntimeError");
 const { TOKEN_TYPE } = require("./token");
 
@@ -24,12 +25,13 @@ class Interpreter {
     return object;
   }
   /**
-   * @param {Expr} expression
+   * @param {Print | Expression} statements
    */
-  interpret(expression) {
+  interpret(statements) {
     try {
-      const value = this._evaluate(expression);
-      console.log(this._stringify(value));
+      for (const statement of statements) {
+        this._execute(statement);
+      }
     } catch (/** @type {RuntimeError}*/ error) {
       this.runtimeError(error);
     }
@@ -49,6 +51,28 @@ class Interpreter {
    */
   _evaluate(expr) {
     return expr.accept(this);
+  }
+
+  /**
+   * @param {Stmt} stmt
+   */
+  _execute(stmt) {
+    stmt.accept(this);
+  }
+
+  /**
+   * @param {Expression} stmt
+   */
+  visitExpressionStmt(stmt) {
+    this._evaluate(stmt.expression);
+  }
+
+  /**
+   * @param {Print} stmt
+   */
+  visitPrintStmt(stmt) {
+    const value = this._evaluate(stmt.expression);
+    console.log(JSON.stringify(value));
   }
 
   /**

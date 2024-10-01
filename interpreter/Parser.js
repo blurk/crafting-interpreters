@@ -1,5 +1,6 @@
 const { TOKEN_TYPE, Token } = require("./token");
 const Expr = require("./Expr");
+const Stmt = require("./Stmt");
 
 /**
  * @callback errorToken
@@ -28,12 +29,34 @@ class Parser {
     this.#error = error;
   }
 
-  parse() {
-    try {
-      return this.expression();
-    } catch (error) {
-      return null;
+  _printStatement() {
+    const value = this.expression();
+    this._consume(TOKEN_TYPE.SEMICOLON, "Expect ';' after value.");
+    return new Stmt.Print(value);
+  }
+
+  _expressionStatement() {
+    const expr = this.expression();
+    this._consume(TOKEN_TYPE.SEMICOLON, "Expect ';' after expression.");
+    return new Stmt.Expression(expr);
+  }
+
+  _statement() {
+    if (this._match(TOKEN_TYPE.PRINT)) {
+      return this._printStatement();
     }
+
+    return this._expressionStatement();
+  }
+
+  parse() {
+    const statements = [];
+
+    while (!this._isAtEnd()) {
+      statements.push(this._statement());
+    }
+
+    return statements;
   }
 
   _previous() {

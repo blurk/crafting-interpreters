@@ -14,6 +14,11 @@ defineAst(outputDir, "Expr", [
   "Unary    : operator, right",
 ]);
 
+defineAst(outputDir, "Stmt", [
+  "Expression : expression",
+  "Print      : expression",
+]);
+
 function defineType(path, baseName, className, fieldList) {
   const stringToAppend = `class ${className} extends ${baseName} {\nconstructor(${fieldList}) {\nsuper();\n${fieldList
     .split(",")
@@ -45,7 +50,7 @@ function defineAst(outputDir = "interpreter", baseName, types) {
 
   fs.appendFileSync(
     path,
-    `module.exports={Expr, ${types
+    `module.exports={${baseName}, ${types
       .map((type) => type.split(":")[0].trim())
       .join(",")}}`
   );
