@@ -1,6 +1,13 @@
 class Expr {
 accept(visitor){}
 }
+class Assign extends Expr {
+constructor(name, value) {
+super();
+this.name = name;
+this.value = value;
+}accept(visitor){return  visitor.visitAssignExpr(this);}
+}
 class Binary extends Expr {
 constructor(left, operator, right) {
 super();
@@ -28,4 +35,10 @@ this.operator = operator;
 this.right = right;
 }accept(visitor){return  visitor.visitUnaryExpr(this);}
 }
-module.exports={Expr, Binary,Grouping,Literal,Unary}
+class Variable extends Expr {
+constructor(name) {
+super();
+this.name = name;
+}accept(visitor){return  visitor.visitVariableExpr(this);}
+}
+module.exports={Expr, Assign,Binary,Grouping,Literal,Unary,Variable}

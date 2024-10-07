@@ -1,9 +1,20 @@
-const { Literal, Grouping, Expr, Unary, Binary } = require("./Expr");
-const { Print, Expression, Stmt } = require("./Stmt");
+const {
+  Literal,
+  Grouping,
+  Expr,
+  Unary,
+  Binary,
+  Variable,
+  Assign,
+} = require("./Expr");
+const { Print, Expression, Stmt, Var, Block } = require("./Stmt");
 const RuntimeError = require("./RuntimeError");
 const { TOKEN_TYPE } = require("./token");
+const Environment = require("./Environment");
 
 class Interpreter {
+  #environment = new Environment();
+
   constructor(runtimeError) {
     this.runtimeError = runtimeError;
   }
@@ -61,6 +72,31 @@ class Interpreter {
   }
 
   /**
+   * @param {Block} stmt
+   */
+  visitBlockStmt(stmt) {
+    this._executeBlock(stmt.statements, new Environment(this.#environment));
+    return null;
+  }
+
+  /**
+   * @param {Stmt[]} statements
+   * @param {Environment} environment
+   */
+  _executeBlock(statements, environment) {
+    const previous = this.#environment;
+    try {
+      this.#environment = environment;
+
+      for (const statement of statements) {
+        this._execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
+  }
+
+  /**
    * @param {Expression} stmt
    */
   visitExpressionStmt(stmt) {
@@ -73,6 +109,28 @@ class Interpreter {
   visitPrintStmt(stmt) {
     const value = this._evaluate(stmt.expression);
     console.log(JSON.stringify(value));
+  }
+
+  /**
+   * @param {Var} stmt
+   */
+  visitVarStmt(stmt) {
+    let value = null;
+    if (stmt.initializer !== null) {
+      value = this._evaluate(stmt.initializer);
+    }
+
+    this.#environment.define(stmt.name.lexeme, value);
+    return null;
+  }
+
+  /**
+   * @param {Assign} expr
+   */
+  visitAssignExpr(expr) {
+    const value = this._evaluate(expr.value);
+    this.#environment.assign(expr.name, value);
+    return value;
   }
 
   /**
@@ -113,6 +171,13 @@ class Interpreter {
 
     // Unreachable.
     return null;
+  }
+
+  /**
+   * @param {Variable} expr
+   */
+  visitVariableExpr(expr) {
+    return this.#environment.get(expr.name);
   }
 
   _isEqual(a, b) {

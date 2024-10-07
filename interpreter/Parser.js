@@ -30,15 +30,26 @@ class Parser {
   }
 
   _printStatement() {
-    const value = this.expression();
+    const value = this._expression();
     this._consume(TOKEN_TYPE.SEMICOLON, "Expect ';' after value.");
     return new Stmt.Print(value);
   }
 
   _expressionStatement() {
-    const expr = this.expression();
+    const expr = this._expression();
     this._consume(TOKEN_TYPE.SEMICOLON, "Expect ';' after expression.");
     return new Stmt.Expression(expr);
+  }
+
+  _block() {
+    const statements = [];
+
+    while (!this._check(TOKEN_TYPE.RIGHT_BRACE) && !this._isAtEnd()) {
+      statements.push(this._declaration());
+    }
+
+    this._consume(TOKEN_TYPE.RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
   }
 
   _statement() {
@@ -46,14 +57,48 @@ class Parser {
       return this._printStatement();
     }
 
+    if (this._match(TOKEN_TYPE.LEFT_BRACE)) {
+      return new Stmt.Block(this._block());
+    }
+
     return this._expressionStatement();
+  }
+
+  _varDeclaration() {
+    const name = this._consume(TOKEN_TYPE.IDENTIFIER, "Expect variable name.");
+
+    let initializer = null;
+    if (this._match(TOKEN_TYPE.EQUAL)) {
+      initializer = this._expression();
+    }
+
+    this._consume(
+      TOKEN_TYPE.SEMICOLON,
+      "Expect ';' after variable declaration."
+    );
+
+    return new Stmt.Var(name, initializer);
+  }
+
+  _declaration() {
+    try {
+      if (this._match(TOKEN_TYPE.VAR)) {
+        return this._varDeclaration();
+      }
+
+      return this._statement();
+    } catch (error) {
+      this._synchronize();
+      return null;
+    }
   }
 
   parse() {
     const statements = [];
 
     while (!this._isAtEnd()) {
-      statements.push(this._statement());
+      // statements.push(this._statement());
+      statements.push(this._declaration());
     }
 
     return statements;
@@ -129,11 +174,29 @@ class Parser {
     throw this._error(this._peek(), message);
   }
 
-  expression() {
-    return this.equality();
+  _assignment() {
+    const expr = this._equality();
+
+    if (this._match(TOKEN_TYPE.EQUAL)) {
+      const equals = this._previous();
+      const value = this._assignment();
+
+      if (expr instanceof Expr.Variable) {
+        const name = expr.name;
+        return new Expr.Assign(name, value);
+      }
+
+      this._error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
   }
 
-  equality() {
+  _expression() {
+    return this._assignment();
+  }
+
+  _equality() {
     let expr = this.comparision();
 
     while (this._match(TOKEN_TYPE.BANG_EQUAL, TOKEN_TYPE.EQUAL_EQUAL)) {
@@ -207,8 +270,12 @@ class Parser {
       return new Expr.Literal(this._previous().literal);
     }
 
+    if (this._match(TOKEN_TYPE.IDENTIFIER)) {
+      return new Expr.Variable(this._previous());
+    }
+
     if (this._match(TOKEN_TYPE.LEFT_PAREN)) {
-      const expr = this.expression();
+      const expr = this._expression();
       this._consume(TOKEN_TYPE.RIGHT_PAREN, "Expect ')' after expression.");
       return new Expr.Grouping(expr);
     }

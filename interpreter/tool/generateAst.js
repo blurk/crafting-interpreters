@@ -8,15 +8,19 @@ if (process.argv.length !== 2) {
 const outputDir = process.argv[2];
 
 defineAst(outputDir, "Expr", [
+  "Assign   : name, value",
   "Binary   : left, operator, right",
   "Grouping : expression",
   "Literal  : value",
   "Unary    : operator, right",
+  "Variable : name",
 ]);
 
 defineAst(outputDir, "Stmt", [
+  "Block      : statements",
   "Expression : expression",
   "Print      : expression",
+  "Var        : name, initializer",
 ]);
 
 function defineType(path, baseName, className, fieldList) {
