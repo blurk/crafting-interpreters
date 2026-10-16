@@ -13,3 +13,5 @@ Conversely, when we say an implementation “is an interpreter”, we mean it ta
 ![alt text](image-1.png)
 
 **maximal munch**
+
+- It’s good engineering practice to separate the code that generates the errors from the code that reports them.
