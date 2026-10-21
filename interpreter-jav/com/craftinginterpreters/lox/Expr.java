@@ -1,7 +1,5 @@
 package com.craftinginterpreters.lox;
 
-import java.util.List;
-
 abstract class Expr {
   interface Visitor<R> {
     R visitBinaryExpr(Binary expr);
@@ -9,7 +7,7 @@ abstract class Expr {
     R visitLiteralExpr(Literal expr);
     R visitUnaryExpr(Unary expr);
     R visitCommaExpr(Comma expr);
-    R visitTenaryExpr(Tenary expr);
+    R visitTernaryExpr(Ternary expr);
   }
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {
@@ -79,8 +77,8 @@ abstract class Expr {
     final Expr left;
     final Expr right;
   }
-  static class Tenary extends Expr {
-    Tenary(Expr condition, Expr ifBranch, Expr elseBranch) {
+  static class Ternary extends Expr {
+    Ternary(Expr condition, Expr ifBranch, Expr elseBranch) {
       this.condition = condition;
       this.ifBranch = ifBranch;
       this.elseBranch = elseBranch;
@@ -88,7 +86,7 @@ abstract class Expr {
 
     @Override
     <R> R accept(Visitor<R> visitor) {
-      return visitor.visitTenaryExpr(this);
+      return visitor.visitTernaryExpr(this);
     }
 
     final Expr condition;

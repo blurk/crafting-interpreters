@@ -102,24 +102,24 @@ class Parser {
     }
 
     private Expr comma() {
-        Expr expr = tenary();
+        Expr expr = ternary();
 
         while (match(COMMA)) {
-            Expr right = tenary();
+            Expr right = ternary();
             expr = new Expr.Comma(expr, right);
         }
 
         return expr;
     }
 
-    private Expr tenary() {
+    private Expr ternary() {
         Expr expr = equality();
 
         while (match(QUESTION)) {
             Expr ifBranch = expression();
             consume(COLON, "Expect ':' after ternary condition.");
-            Expr elseBranch = tenary();
-            expr = new Expr.Tenary(expr, ifBranch, elseBranch);
+            Expr elseBranch = ternary();
+            expr = new Expr.Ternary(expr, ifBranch, elseBranch);
         }
 
         return expr;

@@ -36,8 +36,8 @@ class AstPrinter implements Expr.Visitor<String> {
     }
 
     @Override
-    public String visitTenaryExpr(Expr.Tenary expr) {
-        return parenthesize("tenary", expr.condition, expr.ifBranch, expr.elseBranch);
+    public String visitTernaryExpr(Expr.Ternary expr) {
+        return parenthesize("ternary", expr.condition, expr.ifBranch, expr.elseBranch);
     }
 
     private String parenthesize(String name, Expr... exprs) {

@@ -19,7 +19,7 @@ public class GenerateAst {
                 "Literal  : Object value",
                 "Unary    : Token operator, Expr right",
                 "Comma   : Expr left, Expr right",
-                "Tenary   : Expr condition, Expr ifBranch, Expr elseBranch"
+                "Ternary   : Expr condition, Expr ifBranch, Expr elseBranch"
         ));
     }
 
