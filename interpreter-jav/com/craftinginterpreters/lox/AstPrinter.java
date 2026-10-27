@@ -32,12 +32,12 @@ class AstPrinter implements Expr.Visitor<String> {
 
     @Override
     public String visitCommaExpr(Expr.Comma expr) {
-        return parenthesize("comma", expr.left, expr.right);
+        return parenthesize(",", expr.left, expr.right);
     }
 
     @Override
     public String visitTernaryExpr(Expr.Ternary expr) {
-        return parenthesize("ternary", expr.condition, expr.ifBranch, expr.elseBranch);
+        return parenthesize("?.", expr.condition, expr.ifBranch, expr.elseBranch);
     }
 
     private String parenthesize(String name, Expr... exprs) {

@@ -138,10 +138,6 @@ class Parser {
     }
 
     private Expr comparison() {
-        if (missingLeftOperand()) {
-            return null;
-        }
-
         Expr expr = term();
 
         while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
@@ -154,10 +150,6 @@ class Parser {
     }
 
     private Expr term() {
-        if (missingLeftOperand()) {
-            return null;
-        }
-
         Expr expr = factor();
 
         while (match(MINUS, PLUS)) {
@@ -170,10 +162,6 @@ class Parser {
     }
 
     private Expr factor() {
-        if (missingLeftOperand()) {
-            return null;
-        };
-
         Expr expr = unary();
 
         while (match(SLASH, STAR)) {
@@ -196,6 +184,10 @@ class Parser {
     }
 
     private Expr primary() {
+        if (missingLeftOperand()) {
+            return null;
+        }
+
         if (match(FALSE)) {
             return new Expr.Literal(false);
         }
